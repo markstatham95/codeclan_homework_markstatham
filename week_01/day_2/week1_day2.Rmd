@@ -1,0 +1,144 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+stock_prices <- c(23, 27, 23, 21, 34, 24, 25, 30, 37, 30)
+
+day_of_week <- rep(c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday"), times = 2)
+day_of_week
+
+```
+
+
+```{r}
+day_of_week_factor <- as.factor(day_of_week)
+
+class(day_of_week_factor)
+class(day_of_week)
+```
+
+```{r}
+names(stock_prices) 
+```
+
+```{r}
+names(stock_prices) <- day_of_week
+
+stock_prices
+
+?names
+```
+
+
+```{r}
+stock.data <- data.frame(stock_prices, day_of_week)
+View(stock.data)
+```
+
+```{r}
+stock_list <- list(a = stock_prices, b = day_of_week, c = stock.data)
+```
+
+
+Part 2 Q1
+```{r}
+stock_prices
+
+stock_prices <- c(23, 27, 23, 21, 34, 24, 25, 30, 37, 30)
+
+stock_prices[4:6]
+
+stock_prices[stock_prices > 30]
+```
+
+
+Q2
+```{r}
+stock.data$day_of_week
+
+
+
+
+```
+
+
+```{r}
+subset(stock.data, stock_prices < 25)
+```
+
+```{r}
+stock.data[,1]
+```
+```{r}
+stock.data[3,]
+```
+
+
+```{r}
+stock.data$stock_prices[3]
+```
+Question 4 
+```{r}
+stock_list
+stock_list$c
+class(stock_list$c)
+```
+
+
+
+
+
+
+Extension 
+```{r}
+devtools::install_github("mdancho84/tidyquant")
+
+```
+
+```{r}
+library(tidyquant)
+```
+
+```{r}
+?tidyquant
+```
+
+
+```{r}
+library(dplyr)
+```
+```{r}
+tq_get_options()
+```
+
+```{r}
+peabody_stock_prices <- tq_get("BTU")
+```
+
+
+```{r}
+str(peabody_stock_prices)
+```
+
+```{r}
+peabody_stock_prices$open <- NULL
+peabody_stock_prices$high <- NULL
+peabody_stock_prices$low <- NULL
+peabody_stock_prices$volume <- NULL
+peabody_stock_prices$adjusted <- NULL
+```
+
+
+```{r}
+str(peabody_stock_prices)
+```
+
+```{r}
+
+subset(peabody_stock_prices, close > mean(close))
+```
+
