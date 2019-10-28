@@ -1,0 +1,263 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+functions 
+2.2.1
+```{r}
+multiply_15_add_4 <- function(x){
+  x * 15 + 4 
+}
+
+multiply_15_add_4(1)
+multiply_15_add_4(2)
+multiply_15_add_4(3)
+```
+
+
+```{r}
+
+things <- as.factor(c("goose", "duck", "pigeon"))
+
+bird <- function(x){
+  
+  if (x == things){
+    print("bird")
+  }
+  else {
+    print("not bird")
+  }
+}
+
+bird("goose")
+
+bird("apple")
+
+bird(5)
+```
+
+
+
+```{r}
+multiply_by_10 <- function(x){
+  
+  if (is.numeric(x) == TRUE){ 
+  
+    return(x * 10)
+    
+  } else {
+    
+    print("Invalid input")
+  }
+  
+}
+
+multiply_by_10(2)
+multiply_by_10(5.2)
+multiply_by_10("pie")
+
+
+```
+
+2.3.
+```{r}
+library(dplyr)
+```
+2.3.1
+```{r}
+sizes <- c(13, 15, 10, 8, 22)
+
+ifelse(sizes <= 10, "Small", "Big")
+
+sizes_factor <- as.factor(sizes)
+
+levels(sizes_factor)
+recode(sizes, "8" = "Small", 
+              "10" = "Small", 
+              "13" = "Big", 
+              "15" = "Big", 
+              "22" = "Big"
+)
+
+case_when(
+  sizes <= 10 ~ "Small", 
+  sizes >  10 ~ "Big"
+  )
+
+```
+
+2.3.2
+1
+```{r}
+fruit <- c("apple", "apple", "banana", "cherry", "cherry")
+
+
+fruit_1 <- ifelse(fruit == "apple", "alpaca", fruit)
+
+fruit_2 <- ifelse(fruit_1 == "banana", "bonobo", fruit_1)
+
+fruit_3 <- ifelse(fruit_2 == "cherry", "chipmunk", fruit_2)
+
+fruit_3
+
+```
+
+2
+```{r}
+class(fruit)
+
+fruit_factor <- (as.factor(fruit))
+recode(fruit, "apple"  = " alpaca", 
+              "banana" = "bonobo", 
+              "cherry" = "chipmunk"
+)
+
+
+```
+
+3
+```{r}
+case_when(
+  fruit == "apple"  ~ "alpaca", 
+  fruit == "banana" ~ "bonobo", 
+  fruit == "cherry" ~ "chipmunk"
+) 
+
+
+```
+
+2.3.3
+```{r}
+wife_age <- c(29L, 30L, 36L, 31L, 22L)
+husband_age <- c(28L, 35L, 32L, 31L, 29L)
+```
+1 - this was messy
+```{r}
+spouse_joust <- wife_age - husband_age
+spouse_joust
+spouse_joust_1 <- ifelse(spouse_joust >= 1, "Wife older", "Husband older")
+
+spouse_joust_2 <- ifelse(spouse_joust == 0, "Same age", spouse_joust_1)
+
+spouse_joust_2
+```
+
+2 Hard coded this - sure there is a more elegant way 
+```{r}
+spouse_joust
+
+?recode
+
+
+recode(spouse_joust, "Wife older", "Husband older", "Wife older", "Same age", "Husband older")
+```
+
+3 
+
+```{r}
+case_when(
+  spouse_joust >=  1 ~ "Wife older", 
+  spouse_joust ==   0 ~ "Same age", 
+  spouse_joust <= -1 ~ "Husband older"
+)
+```
+
+
+2.4 
+
+```{r}
+my_list <- list(
+  4,
+  "apple",
+  10.5,
+  c("is", "an", "apple"),
+  "apple",
+  c("i", "like", "apples"),
+  8
+)
+```
+
+
+2.4.1
+```{r}
+class(my_list)
+print(my_list)
+
+is.character(my_list[[1]])
+is.character(my_list[[2]])
+
+character_list <- list(is.character(my_list))
+str(my_list)
+character_list
+
+elementType(my_list)
+for (character in my_list) {
+    
+    
+    print()
+}
+
+for(character in my_list){
+  
+  for(col_index in 1:num_cols){
+    
+    print(my_matrix[row_index, col_index])
+  }
+}
+
+character
+```
+
+```{r}
+
+for (element in my_list) {
+  
+  if(class(element) == "character") {
+    print(element)
+    
+  }
+}
+```
+
+
+
+```{r}
+
+# set the value we want to start printing at 
+current_value <- 0
+# set value we want to stop at
+stop_value <- length(my_list)
+while(current_value < stop_value) {
+  current_value <- current_value + 1
+if(class(my_list[[current_value]]) == "character") {
+    print(my_list[current_value])}
+}
+```
+
+```{r}
+
+# set the value we want to start printing at 
+current_value <- 0
+# set value we want to stop at
+stop_value <- length(my_list)
+while(current_value < stop_value) {
+  current_value <- current_value + 1
+if(length(my_list[[current_value]]) > 1) {
+    paste(my_list[current_value])}
+}
+
+
+for (element in my_list) {
+  phrase <- paste(element, "")
+  if(element > 1) {
+    print(phrase)
+    
+  }
+}
+
+```
+
+
+
+

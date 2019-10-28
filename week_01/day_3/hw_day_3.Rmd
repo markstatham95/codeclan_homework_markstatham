@@ -63,8 +63,10 @@ hist(temp_data_frame$JUN)
 
 ```{r}
 
-table(game_of_thrones$characters)
+length(game_of_thrones$characters)
 
+
+game_of_thrones$characters[[379]]
 
 
 
