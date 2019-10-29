@@ -52,11 +52,10 @@ cars
 ```
 Q4
 ```{r}
-scotland <- read_tsv("~/homework/week_02/data/scotland.txt", 
-                     skip = 1)
+scotland <- read_delim("~/homework/week_02/data/scotland.txt", 
+                     delim = ";", skip = 1)
 
 
-?read_file
 scotland 
 
 
@@ -74,8 +73,7 @@ scotland_character
 
 Q6
 ```{r}
-steam <- read_csv("~/homework/week_02/data/steam-200k-sample.csv", 
-                  skip = 4)
+steam <- read_csv("~/homework/week_02/data/steam-200k-sample.csv", skip = 4)
 
 steam
 ```
@@ -88,7 +86,9 @@ eu_payments_historic
 ```
 Q8 
 ```{r}
+scot <- read_lines("~/homework/week_02/data/scotland.txt")
 
+scot
 ```
 
 
@@ -130,6 +130,8 @@ Extension
 library(readxl)
 
 green_bindle <- 
+  
+  
   for read_excel("~/homework/week_02/data/green_bindle_consulting.xlsx", sheet = 1)
 
 head(green_bindle)
