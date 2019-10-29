@@ -1,0 +1,144 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Homework - Week 2 Day 1 
+
+
+```{r}
+library(readr)
+```
+
+
+1. MVP 
+
+Q1 & Q2
+
+```{r}
+
+
+state_income <- read_csv("~/homework/week_02/data/state_income_data.csv",
+                         skip = 2,
+                         col_names = c("Index", 
+                                       "State", 
+                                       "2002", 
+                                       "2003", 
+                                       "2004", 
+                                       "2005", 
+                                       "2006", 
+                                       "2007",
+                                       "2008", 
+                                       "2009",
+                                       "2010", 
+                                       "2011", 
+                                       "2012", 
+                                       "2013", 
+                                       "2014", 
+                                       "2015")
+                         )
+
+head(state_income)
+```
+
+Q3
+```{r}
+
+cars
+cars <- read_csv("~/homework/week_02/data/cars.csv", 
+                 col_types = cols("c", "d", "d", "d", "d", "l"))
+
+cars
+```
+Q4
+```{r}
+scotland <- read_tsv("~/homework/week_02/data/scotland.txt", 
+                     skip = 1)
+
+
+?read_file
+scotland 
+
+
+```
+
+
+
+Q5 
+```{r}
+scotland_character <-
+  read_lines("~/homework/week_02/data/scotland.txt")
+
+scotland_character
+```
+
+Q6
+```{r}
+steam <- read_csv("~/homework/week_02/data/steam-200k-sample.csv", 
+                  skip = 4)
+
+steam
+```
+
+Q7
+```{r}
+eu_payments_historic <- read_tsv("~/homework/week_02/data/historic_eu_payments.tsv")
+
+eu_payments_historic
+```
+Q8 
+```{r}
+
+```
+
+
+
+Q9 
+
+```{r}
+library(haven)
+africa_health <- read_stata("~/homework/week_02/data/africa_health_data.dta")
+
+head(africa_health)
+
+africa_health <- as_factor(africa_health)
+head(africa_health)
+
+```
+
+
+
+Q10
+
+```{r}
+library(jsonlite)
+
+```
+
+
+```{r}
+sample_json <- read_json("http://makemeanalyst.com/wp-content/uploads/2017/06/sample_json.txt")
+
+sample_json
+```
+
+
+
+Extension 
+
+```{r}
+library(readxl)
+
+green_bindle <- 
+  for read_excel("~/homework/week_02/data/green_bindle_consulting.xlsx", sheet = 1)
+
+head(green_bindle)
+```
+
+
+
+
+
+
+
+

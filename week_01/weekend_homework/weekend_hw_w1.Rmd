@@ -18,23 +18,20 @@ multiply_15_add_4(3)
 
 ```{r}
 
-things <- as.factor(c("goose", "duck", "pigeon"))
 
-bird <- function(x){
-  
-  if (x == things){
-    print("bird")
-  }
-  else {
-    print("not bird")
+is_bird <- function(x) {
+  if (x %in% c("goose", "duck", "pigeon")) {
+    return("bird")
+  } else {
+    return("not bird")
   }
 }
 
-bird("goose")
+is_bird("goose")
 
-bird("apple")
+is_bird("apple")
 
-bird(5)
+is_bird(5)
 ```
 
 
@@ -48,7 +45,7 @@ multiply_by_10 <- function(x){
     
   } else {
     
-    print("Invalid input")
+    return(print("Invalid input"))
   }
   
 }
@@ -151,6 +148,9 @@ spouse_joust
 
 
 recode(spouse_joust, "Wife older", "Husband older", "Wife older", "Same age", "Husband older")
+
+difference <- sign(wife_age - husband_age)
+recode(difference, `1` = "Wife older", `0` = "Same age", `-1` = "Husband older")
 ```
 
 3 
@@ -211,10 +211,10 @@ character
 
 ```{r}
 
-for (element in my_list) {
+for (i in my_list) {
   
-  if(class(element) == "character") {
-    print(element)
+  if(is.character(i) == TRUE) {
+    print(i)
     
   }
 }
@@ -223,11 +223,11 @@ for (element in my_list) {
 
 
 ```{r}
-
-# set the value we want to start printing at 
+ 
 current_value <- 0
-# set value we want to stop at
+
 stop_value <- length(my_list)
+
 while(current_value < stop_value) {
   current_value <- current_value + 1
 if(class(my_list[[current_value]]) == "character") {
