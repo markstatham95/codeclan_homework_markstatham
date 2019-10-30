@@ -1,0 +1,14 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Week 2 Day 2 Homework 
+
+Q1
+
+```{r}
+
+```
+
+
