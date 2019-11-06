@@ -1,0 +1,120 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+dplyr homework
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+drinks_content <- read_csv("starbucks-menu-nutrition-drinks.csv")
+
+head(drinks_content)
+
+view(drinks_content)
+```
+
+```{r}
+dim(drinks_content)
+
+names(drinks_content)
+```
+
+```{r}
+mean(drinks_content$Calories)
+
+
+drinks_full <- read_csv("starbucks_drinkMenu_expanded.csv")
+
+view(drinks_full)
+
+summary(drinks_full$Calories)
+
+var(drinks_full$Calories)
+
+hist(drinks_full$Calories)
+
+```
+
+
+```{r}
+boxplot(drinks_full$Calories)
+
+outliers <- boxplot(drinks_full$Calories, plot = FALSE)$out
+
+outliers
+```
+
+
+
+
+```{r}
+# select the variables
+drinks <- select(drinks_full, Beverage_category, Beverage, Beverage_prep, Calories)
+
+# check for NA's
+is.na(drinks$Calories)
+```
+
+```{r}
+head(drinks)
+
+drinks %>% 
+  filter(Beverage_category == "Classic Espresso Drinks")
+```
+
+```{r}
+drinks_calories <- drinks_full %>% 
+  mutate(calorie_diff = Calories - 135)
+```
+
+
+
+```{r}
+drinks_grouped <- drinks_calories %>% 
+  group_by(Beverage_prep, Calories) %>%
+  summarise(mean_cal = mean(Calories)) %>% 
+  arrange(desc(mean_cal))
+```
+
+```{r}
+# calculate least calories
+least_calories <- drinks_calories %>%
+  arrange(Calories) %>%
+  mutate(ranking = min_rank(Calories)) %>%
+  filter(ranking <=2)
+
+# calculate most calories
+most_calories <- drinks_calories %>%
+  mutate(ranking = min_rank(desc(Calories))) %>%
+  filter(ranking <=2)
+
+```
+
+
+```{r}
+above_average_calories <- drinks_grouped %>%
+  filter(Calories > mean(Calories))
+```
+
+
+
+
+```{r}
+drinks_distribution <- drinks_grouped %>% 
+  mutate(top_cal = cume_dist(desc(Calories))) %>% 
+  filter(top_cal < 0.25) %>% 
+  select(top_cal, Calories, Beverage_prep)
+```
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,49 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+
+
+```
+
+```{r}
+women_in_gov <- read_csv("women_in_gov.csv", skip = 3)
+
+head(women_in_gov)
+
+```
+
+```{r}
+names(women_in_gov)
+
+library(janitor)
+
+women_in_gov <- clean_names(women_in_gov)
+
+dim(women_in_gov)
+
+women_in_gov$indicator_name[]
+```
+
+```{r}
+women_in_gov %>% 
+  filter(!is.na(x64))
+
+women_in_gov %>%
+  filter(indicator_name != "Proportion of seats held by women in national parliaments (%)")
+
+women_in_gov %>% 
+  filter(indicator_code != "SG.GEN.PARL.ZS")
+```
+
+```{r}
+women_in_gov_filtered <- women_in_gov %>% 
+  select(-indicator_name, -indicator_code, -x64)
+
+head(women_in_gov_filtered)
+  
+```
+

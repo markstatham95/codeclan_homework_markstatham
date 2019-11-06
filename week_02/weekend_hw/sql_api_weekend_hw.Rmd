@@ -240,11 +240,13 @@ acme_feedback_emotions <- flatten(acme_feedback_emotions)
 
 acme_feedback_emotions
 
-anger <-    map_dbl(acme_feedback_emotions, "anger")
-fear <-     map_dbl(acme_feedback_emotions, "fear")
-joy <-      map_dbl(acme_feedback_emotions, "joy")
-sadness <-  map_dbl(acme_feedback_emotions, "sadness")
-surprise <- map_dbl(acme_feedback_emotions, "surprise")
+anger    <-  map_dbl(acme_feedback_emotions, "anger")
+fear     <-  map_dbl(acme_feedback_emotions, "fear")
+joy      <-  map_dbl(acme_feedback_emotions, "joy")
+sadness  <-  map_dbl(acme_feedback_emotions, "sadness")
+surprise <-  map_dbl(acme_feedback_emotions, "surprise")
+
+
 acme_emotions_df <- data.frame(
   feedback = acme_feedback,
   anger = anger,
@@ -304,6 +306,8 @@ employees_emotions_df <- data.frame(
   )
 
 employees_emotions_df
+
+map_df(employees_emotions_df, mean, na.rm = TRUE)
 ```
 
 
