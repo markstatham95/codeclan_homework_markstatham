@@ -38,7 +38,7 @@ women_in_gov %>%
 women_in_gov %>% 
   filter(indicator_code != "SG.GEN.PARL.ZS")
 ```
-
+3
 ```{r}
 women_in_gov_filtered <- women_in_gov %>% 
   select(-indicator_name, -indicator_code, -x64)
@@ -46,4 +46,113 @@ women_in_gov_filtered <- women_in_gov %>%
 head(women_in_gov_filtered)
   
 ```
+
+4
+```{r}
+women_in_gov_long <- women_in_gov_filtered %>% 
+  pivot_longer(cols = starts_with("x"), 
+               names_to = "year",
+               values_to = "prop_women")
+
+view(women_in_gov_long)
+  
+```
+
+5
+```{r}
+women_in_gov_long %>% 
+  filter(is.na(prop_women)) %>%
+  count()
+
+#not sure how to count the unique ones - as they are in one col
+
+```
+
+
+
+
+```{r}
+#another way to do it, found in notes 
+
+
+women_in_gov_long %>%
+  summarise(count = sum(is.na(prop_women)))
+
+women_in_gov_long$prop_women
+
+
+#brute force method - just dropping the NAs from the whole data 
+
+women_in_gov_drop_na <- women_in_gov_long %>% 
+  drop_na()
+```
+
+```{r}
+#going to attempt to try to impute the values here - would want to do it by the mean of the countries, not the mean of the whole data 
+
+
+mean(women_in_gov_long$prop_women, na.rm = TRUE)
+
+median(women_in_gov_long$prop_women, na.rm = TRUE)
+
+
+women_in_gov_long %>% 
+  filter(country_code == "ALB") %>%
+  summarise(mean(prop_women, na.rm = TRUE))
+
+```
+
+
+
+```{r}
+boxplot(women_in_gov_drop_na$prop_women)
+```
+
+
+
+
+```{r}
+library(outliers)
+
+prop_women_z <- scores(women_in_gov_drop_na$prop_women)
+
+is_outlier <- prop_women_z > 3 | prop_women_z < -3
+
+women_in_gov_drop_na <- women_in_gov_drop_na %>%
+  mutate(is_outlier = is_outlier)
+```
+
+
+```{r}
+clean_women_in_gov <- women_in_gov_drop_na %>%
+  
+```
+
+
+
+```{r}
+outliers_women_in_gov <- women_in_gov_drop_na %>% 
+  filter(is_outlier == TRUE)
+```
+
+
+```{r}
+women_in_gov_avg_top10 <- women_in_gov_drop_na %>% 
+  arrange(country_name,country_code, year) %>%
+  group_by(country_name, country_code) %>%
+  summarise(avg = mean(prop_women)) %>%
+  arrange(desc(avg)) %>%
+  top_n(10)
+
+head(women_in_gov_avg_top10)
+
+women_in_gov_avg_top10 %>% 
+  top_n(10)
+
+
+```
+
+
+
+
 

@@ -1,0 +1,166 @@
+---
+title: "ggplot homework"
+output: html_notebook
+---
+
+```{r}
+library(CodeClanData)
+
+# Process data into arguments needed by plot()
+regions <- levels(as.factor(whisky$Region))
+colours0 <- seq(length(regions))
+colours <- as.numeric(as.factor(whisky$Region))
+
+# Call plot
+plot(
+  x = whisky$YearFound, y = whisky$Capacity, col = colours, type = "p", log = "y", pch = 16,
+  xlab = "Year Founded", ylab = "Distillery Capacity"
+)
+
+# Add legend
+legend(1948, 2.51e07, legend = regions, col = colours0, pch = 16)
+```
+
+```{r}
+#recreate the above graph using ggplot 
+library(tidyverse)
+
+names(whisky)
+ggplot(whisky) +
+  aes(x = YearFound, y = Capacity) + 
+  geom_point(aes(colour = Region)) + 
+  scale_x_continuous() + 
+  scale_y_log10()
+```
+2 - Faceting 
+```{r}
+library(janitor)
+guerry <- clean_names(Guerry)
+
+head(guerry)
+
+```
+
+
+1.Use facetting to investigate the relationship between crimes rates against property vs against persons, and how they differ between regions.
+
+```{r}
+ggplot(guerry, aes(x = crime_prop, y = crime_pers)) +
+  geom_point() + 
+  facet_wrap(~ region)
+```
+
+2. Also try introducing a simple linear model between crime rates (and an error ribbon) using geom_smooth() to each facet.
+
+```{r}
+ggplot(guerry, aes(x = crime_prop, y = crime_pers)) +
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~ region)
+
+```
+
+3. Repeat the process for literacy rates (you will need to bin literacy rates into categories).
+
+```{r}
+
+guerry$literacy
+
+guerry <- guerry %>% 
+  mutate(literacy_grouped = cut_number(literacy, 4))
+
+ggplot(guerry, aes(x = literacy_grouped, y = crime_pers)) +
+  geom_point() + 
+  geom_smooth() + 
+  facet_wrap(~ region) + 
+  geom_jitter()
+```
+
+3. Scales and Coordinates
+```{r}
+hills2000
+```
+
+1. Produce a scatter plot of speed vs climb with a linear regression model fitted to the data using geom_smooth(method = "lm).
+
+```{r}
+names(hills2000)
+
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm")
+```
+
+
+
+2. Use scale to apply a log10 transform to the climb.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  scale_y_log10()
+```
+
+
+3. Rename the axes appropriately, and show units on the axis titles.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  scale_y_log10() + 
+  labs(
+    y = "Climb (ft)", 
+    x = "Speed (mph)"
+  )
+```
+4. Relabel the x-axis to be evenly spaced.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  scale_y_log10() + 
+  labs(
+    y = "Climb (ft)", 
+    x = "Speed (mph)"
+  ) 
+```
+
+
+5. Colour points and linear model based on sex.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point(aes(colour = Sex)) + 
+  geom_smooth(aes(colour = Sex), method = "lm") + 
+  scale_y_log10() + 
+  labs(
+    y = "Climb (ft)", 
+    x = "Speed (mph)"
+  ) 
+```
+
+6. Facet the plot by sex.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  scale_y_log10() + 
+  labs(
+    y = "Climb (ft)", 
+    x = "Speed (mph)"
+  )  + facet_grid(~Sex)
+```
+
+
+7. Zoom in to the plot so only speeds between 4mph and 11mph are shown. Be careful not to alter the linear model in doing so.
+```{r}
+ggplot(hills2000, aes(x = speed, y = climb)) + 
+  geom_point() + 
+  geom_smooth(method = "lm") + 
+  scale_y_log10() + 
+  labs(
+    y = "Climb (ft)", 
+    x = "Speed (mph)"
+    ) + 
+  coord_cartesian(xlim = c(4, 11))
+```
+
