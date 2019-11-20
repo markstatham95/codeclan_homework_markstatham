@@ -4,6 +4,7 @@ output: html_notebook
 ---
 
 ```{r}
+library(tidyverse)
 library(CodeClanData)
 
 # Process data into arguments needed by plot()
@@ -55,7 +56,7 @@ ggplot(guerry, aes(x = crime_prop, y = crime_pers)) +
 ```{r}
 ggplot(guerry, aes(x = crime_prop, y = crime_pers)) +
   geom_point() + 
-  geom_smooth() + 
+  geom_smooth(method = "lm") + 
   facet_wrap(~ region)
 
 ```
@@ -69,10 +70,10 @@ guerry$literacy
 guerry <- guerry %>% 
   mutate(literacy_grouped = cut_number(literacy, 4))
 
-ggplot(guerry, aes(x = literacy_grouped, y = crime_pers)) +
+ggplot(guerry, aes(x = crime_pers, y = crime_prop)) +
   geom_point() + 
-  geom_smooth() + 
-  facet_wrap(~ region) + 
+  geom_smooth(method = "lm") + 
+  facet_wrap(~ literacy_grouped) + 
   geom_jitter()
 ```
 
@@ -142,7 +143,7 @@ ggplot(hills2000, aes(x = speed, y = climb)) +
 ```{r}
 ggplot(hills2000, aes(x = speed, y = climb)) + 
   geom_point() + 
-  geom_smooth(method = "lm") + 
+  geom_smooth(method = "lm",colour = "red") + 
   scale_y_log10() + 
   labs(
     y = "Climb (ft)", 
@@ -154,7 +155,7 @@ ggplot(hills2000, aes(x = speed, y = climb)) +
 7. Zoom in to the plot so only speeds between 4mph and 11mph are shown. Be careful not to alter the linear model in doing so.
 ```{r}
 ggplot(hills2000, aes(x = speed, y = climb)) + 
-  geom_point() + 
+  geom_point(size = 0.5, alpha = 0.5) + 
   geom_smooth(method = "lm") + 
   scale_y_log10() + 
   labs(
