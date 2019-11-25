@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Advanced ggplot homework
@@ -66,9 +68,13 @@ qb_monthly_sales %>%
   filter(Cashflow != "Kwikbit Unit 1 Sales") %>%
   mutate(rev_cost = if_else(Cashflow == "Total Revenue", "Total Revenue", "Cost")) %>%
   ggplot() +
-  aes(x = Date, y = Amount, group = rev_cost) + 
-  geom_line(color = "#E89FE9", size = 1)  + 
-  company_theme
+  aes(x = Date, y = Amount, group = rev_cost, colour = Cashflow) + 
+  geom_line(size = 1)  + 
+  company_theme + 
+  scale_colour_manual(values = col_scheme) + 
+  labs(
+    title = "Revenue and Costs 2018 - 2019"
+  )
 
 ```
 
@@ -76,12 +82,24 @@ qb_monthly_sales %>%
 ```{r}
 view(qb_competitors)
 
+qb_competitors %>%
+  filter(Year == "2019") %>%
+  summarise(sum(Revenue))
+
 ggplot(qb_competitors) + 
   aes(x = Year, y = Revenue, fill = Company) + 
   geom_area() + 
   company_theme + 
   scale_fill_manual(values = col_scheme) + 
   scale_y_continuous(labels = scales::dollar_format(prefix = "£"))
+
+ggplot(qb_competitors) + 
+  aes(x = Year, y = Revenue, fill = Company) + 
+  geom_area(position = "identity", alpha = 0.5) + 
+  company_theme + 
+  scale_fill_manual(values = col_scheme) + 
+  scale_y_continuous(labels = scales::dollar_format(prefix = "£"))
+
 
 ```
 
@@ -103,13 +121,14 @@ ggplot(qb_competitors) +
 view(qb_device_data)
 
 tail(qb_device_data)
-
+class(qb_device_data)
 
 qb_device_data %>%
+mutate( decimal_hour = (hours + mins)/60) %>%
 ggplot() + 
-  aes(x = hours, y = counts, group = mins, colour = mins) +  
+  aes(x = decimal_hour, y = counts, colour = device) +  
   geom_line() + 
-  facet_grid( id ~ device, scales = "free_y") +
+  facet_grid(id ~ device, scales = "free_y") +
   theme_bw(base_size = 12, base_family = "Trebuchet MS") +
   theme( 
         strip.background = element_blank(), 
@@ -118,7 +137,7 @@ ggplot() +
         panel.grid.major = element_line(colour = "grey95", size   = 0.5), 
         panel.grid.minor = element_line(colour = "grey95", size   = 0.5)
 ) +
-  scale_colour_gradientn(colors = rev(col_scheme)) + 
+  scale_colour_manual(values = col_scheme) + 
   labs(
     title    = "KwikBit1 versus Competitor Products", 
     subtitle = "Activity of 5 Individuals over 24 Hours", 
@@ -127,5 +146,24 @@ ggplot() +
     caption = "Scales have been adjusted to improve interpretation"
   ) 
   
+```
+
+```{r}
+qb_device_data_time <- qb_device_data %>%
+  group_by(device, id) %>%
+  mutate(total_hours  = hours + (mins/60),
+         total_counts = cumsum(counts))
+ggplot(qb_device_data_time, aes(x      = total_hours, 
+                                y      = total_counts,
+                                colour = device
+                                )) +
+   geom_line() +
+   labs(
+     y     = "Steps Counted",
+     title = "Steps Counted By Device"
+   ) +
+   facet_wrap(~ id, ncol = 2) +
+   company_theme +
+   scale_colour_manual(values = col_scheme)
 ```
 
