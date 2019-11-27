@@ -88,7 +88,7 @@ server <- function(input, output) {
 
   output$big_three_ratingPlot <- renderPlot({
     game_sales %>%
-      filter(year_of_release > 2001) %>%
+      filter(year_of_release > 1998) %>%
       filter(big_three == input$big_three_rating) %>%
       ggplot() +
       aes(x = user_score, y = critic_score) +

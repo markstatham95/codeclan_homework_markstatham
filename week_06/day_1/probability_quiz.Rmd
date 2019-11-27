@@ -1,0 +1,295 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+
+```{r}
+library(prob)
+library(tidyverse)
+```
+
+
+# Probability Quiz
+
+1. If I roll a six-sided dice once, what is the probability of getting a number less than 5?
+
+> 4/6 = 2/3 = 0.66667
+
+
+2. How many outcomes are there in the sample space of an experiment in which we toss three dice?
+
+
+```{r}
+6 ^3 
+```
+
+3. In an experiment where we roll four dice:
+
+ i. how many outcomes are in the event total_equals_5_6_7 (i.e. the total of the four dice equals 5, 6 or 7)?
+ 
+ 
+```{r}
+four_die <- rolldie(4)
+
+four_die <- four_die %>%
+  mutate(total = X1 + X2 + X3 + X4)
+
+nrow(four_die)
+
+four_die
+
+four_die %>%
+  filter(total %in% c(5,6,7)) %>%
+  summarise(n())
+
+
+
+```
+ 
+ 
+ ii. What is the probability of this event? 
+ 
+```{r}
+
+34 / nrow(four_die)
+
+
+```
+ 
+ 
+ iii. What assumptions do we apply? 
+```{r}
+
+## assume that it is a fair die - ie, that each outcome is equally likely - and mutually exclusive 
+
+```
+ 
+
+4. Five chairs are placed in a row in a room, along with five people of differing height. The people sit down randomly on the chairs. What is the probability that they sit in order of decreasing height, left to right?
+
+```{r}
+library(gtools)
+
+permutations(n = 5, r = 5, repeats.allowed = FALSE)
+
+#probability is one in 120 --
+
+1 / 120
+
+```
+
+ 
+ 5. I roll six dice:
+ 
+    i. what is the probability I see the numbers 6, 5, 4, 3, 2 and 1 in order on the dice, left to right?
+    
+```{r}
+six_die <- rolldie(6)
+six_die
+
+nrow(six_die)
+
+six_die_my_perm <- six_die %>%
+  filter(isin(., c(6, 5, 4, 3, 2, 1), ordered = TRUE))
+
+perm_die_six <- permutations(n = 6, r = 6, repeats.allowed = TRUE)
+
+(prob <- nrow(six_die_my_perm) / nrow(six_die))
+
+1/ nrow(six_die)
+
+```
+    
+  ii.what is the probability I see one each of the numbers 6, 5, 4, 3, 2 and 1 on the dice regardless of order?
+  
+```{r}
+six_die_my_comb <- six_die %>%
+  filter(isin(., c(6, 5, 4, 3, 2, 1), ordered = FALSE))
+
+(nrow(six_die_my_comb)/nrow(six_die))
+```
+  
+ 
+6. If I draw a single card from a 52-card deck, and it is black, what is the probability that its suit is spades?
+
+```{r}
+1/2
+
+```
+
+ 
+7. 
+
+
+
+```{r}
+patients <- c("Alice", "Bob", "Carmen", "Dinesh", "Ella", "Fergus", "Gianna", "Henry")
+
+appointments <- as_tibble(permutations(n = 8, r = 5, v = patients, repeats.allowed = FALSE))
+
+
+```
+
+i. How many different orders can the doctor see patients today? 
+```{r}
+nrow(appointments)
+
+```
+
+ii.What is the probability of Gianna and Dinesh both being seen today?
+
+```{r}
+
+
+#need to 
+
+app_g_and_d <- appointments %>%
+  filter(isin(., c("Gianna", "Dinesh"), ordered = FALSE))
+
+app_g_and_d
+
+#probability would equal 
+
+(prob_G_D <- nrow(app_g_and_d) / nrow(appointments))
+
+
+
+```
+
+iii.What is the probability of Gianna being seen before Dinesh today?
+```{r}
+app_g_and_d_ordered <- appointments %>%
+  filter(isin(., c("Gianna", "Dinesh"), ordered = TRUE))
+
+#probability 
+
+(prob_g_before_d <- nrow(app_g_and_d_ordered) / nrow(appointments))
+```
+
+iv. Carmen and Henry have now been triaged as high priority and will be seen in the first two available slots, although their order hasn’t yet been determined. In how many different orders can the patients now be seen?
+
+
+```{r}
+## start by looking at the high priority patients 
+
+high_priority_patients <- c("Carmen", "Henry")
+
+high_pri_apps <- as_tibble(permutations(n = 2, r = 2, v = high_priority_patients, repeats.allowed = FALSE))
+
+high_pri_apps
+
+## now for the remainder 
+
+low_priority_patients <- c("Alice", "Bob", "Dinesh", "Ella", "Fergus", "Gianna")
+
+low_pri_apps <- as_tibble(permutations(n = 6, r = 3, v = low_priority_patients, repeats.allowed = FALSE))
+
+low_pri_apps
+
+names(low_pri_apps) <- c("app3", "app4", "app5")
+
+low_pri_apps
+
+names(high_pri_apps) <- c("app1", "app2")
+
+
+```
+
+
+```{r}
+## now merge the data frames 
+
+appointments_post_triage <- merge(high_pri_apps, low_pri_apps)
+
+appointments_post_triage
+
+nrow(appointments_post_triage)
+
+#240 combinations now 
+```
+
+
+8. 8. If order is not significant, how many ways are there to select a 5 student quiz team from a group of 8 students?
+```{r}
+
+student_quiz_team <- combinations(n = 8, r = 5, repeats.allowed = FALSE)
+
+
+nrow(student_quiz_team)
+```
+
+9. (harder) How would your answer for question 8 change if a team captain had to be selected for each team?
+
+```{r}
+
+#split into two separate questions - as in hospital example
+student_quiz_captains <- as_tibble(combinations(n = 8, r = 1, repeats.allowed = FALSE))
+
+student_quiz_captains 
+
+
+#there are 8 captains 
+
+# multiply this by the combination from n = 7 and r = 4 
+
+
+student_quiz_team_minus_captain <- combinations(n = 7, r = 4, repeats.allowed = FALSE)
+
+8 * nrow(student_quiz_team_minus_captain)
+
+#280 
+
+```
+
+10. 
+```{r}
+#set up the dataframe 
+
+uni <- data.frame(
+  mother_yes = c(32, 22), 
+  mother_no = c(35, 31)
+)
+uni <- cbind(uni, rowSums(uni))
+uni <- rbind(uni, colSums(uni))
+colnames(uni) <- c("mother_yes", "mother_no", "sum")
+rownames(uni) <- c("son_yes", "son_no", "sum")
+
+uni
+```
+
+i. What is the probability that a son attended university given that his mother attended university?
+```{r}
+
+total <- 120
+
+#p(son_attend | mother_attend) = p(son_attend AND mother_attend) / p(mother_attend)
+
+(p_son_ye_AND_mother_yes <- uni["son_yes", "mother_yes"] / total)
+
+p_son_yes <- uni["son_yes", "sum"] / total
+
+p_son_no <- uni["son_no", "sum"] / total
+
+(p_mother_yes <- uni["sum", "mother_yes"] / total)
+
+p_mother_no <- uni["sum", "mother_no"] / total
+
+(p_son_yes_GIVEN_mother_yes <- p_son_ye_AND_mother_yes / p_mother_yes)
+
+```
+
+
+```{r}
+#prob son yes given mother no 
+
+(p_son_yes_GIVEN_mother_no <- p_son_ye_AND_mother_yes / p_mother_no)
+```
+
+
+iii. Is attending university by the son independent of whether his mother attended university?
+
+```{r}
+
+```
+
