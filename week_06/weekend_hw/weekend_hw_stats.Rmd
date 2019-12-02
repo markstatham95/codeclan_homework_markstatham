@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ## Weekend Homework - stats
@@ -27,7 +29,14 @@ players <- clean_names(players)
 players %>%
   ggplot + 
   aes(x = overall) + 
-  geom_histogram(col = "white")
+  geom_histogram(aes(y = ..density..), col = "white") + 
+  stat_function(
+    fun = dnorm,
+    args = list(
+      mean = mean(players$overall),
+      sd = sd(players$overall)
+    ),
+    col = "red")
 ```
 
 
@@ -258,7 +267,7 @@ null_distribution %>%
 
 
 null_distribution %>% 
-  get_p_value(obs_stat = point_est_mean_int_sig$`mean(stat)`, direction = "both")
+  get_p_value(obs_stat = point_est_mean_int_sig$`mean(stat)`, direction = "greater")
 
 #p value > 0.05 so we fail to reject the null hypothesis of no change/ fall in prop of int_significant players
 

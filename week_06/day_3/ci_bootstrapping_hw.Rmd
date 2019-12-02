@@ -221,7 +221,7 @@ bootstrap_early_build %>%
 
 
 ```{r}
-#for reps = 200
+#for reps = 30000
 
 bootstrap_early_build <- ames %>% 
   specify(response = early_build) %>% 
@@ -251,6 +251,6 @@ bootstrap_early_build %>%
   visualise(bins = 30) + 
   shade_confidence_interval(endpoints = early_build_ci_95)
 
-#its getting more precise as we up the reps 
+# the distribution stabilises to become more normal above 20000 reps or near 
 ```
 
