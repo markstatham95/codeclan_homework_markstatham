@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 # Dates and Times Homework
@@ -173,25 +175,41 @@ weather_tsbl %>%
 weather_tsbl <- weather_tsbl %>% 
   mutate(temperature_ra = slide_dbl(temp, 
                                     ~ mean(., na.rm = TRUE), 
-                                    .size = 24))
+                                    .size = 900, .align = "right"))
 
 
 weather_tsbl %>% 
   ggplot + 
   geom_line(aes(x = time_hour, y = temp), col = "grey") + 
-  geom_line(aes(x = time_hour, y = temperature_ra), col = "red") + 
+  geom_line(aes(x = time_hour, y = temperature_ra, colour = origin)) + 
   facet_wrap(~ origin)
 ```
 
 10. Downsample your data so that you plot daily temperature data for each airport, instead of hourly data.
 ```{r}
-weather_tsbl %>% 
-  ggplot + 
-  geom_line(aes(x = time_hour, y = temperature_ra), col = "red")
+weather_date <- weather_tsbl %>% 
+  group_by_key(origin) %>%
+  index_by(date = ~ as_date(.)) %>% 
+  summarise(temp_mean = mean(temp, na.rm = TRUE)) 
+
+
+  ggplot(weather_date) + 
+  geom_line(aes(x = date, y = temp_mean,  col = origin)) + 
+  theme_classic()
 
 ```
 
+```{r}
+weather_date %>% 
+  STL(temp_mean ~ season("12 month")) %>%
+  autoplot()
+```
 
+```{r}
+weather_date %>% 
+  features(temp_mean, feature_set(tags = "stl")) %>%
+  filter(trend_strength == max(trend_strength))
+```
 
 
 
