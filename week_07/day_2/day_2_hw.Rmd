@@ -38,6 +38,8 @@ nyc_bikes %>%
   aes(x = month_used, y = hires_per_month) + 
   geom_col(fill = "indianred") + 
   theme_fivethirtyeight()
+
+#plot tells us that there is a clear spike in the summer months, and much less demand for bike hire in the winter 
 ```
 
 3. Now Summarise the number of bike hire counts by date. Make a plot of this new aggregated data. What does this plot tell you about the time series? Would this data be preferrable for time series forecasting compared to the monthly data?
@@ -55,6 +57,8 @@ nyc_bikes_date_sum <- nyc_bikes %>%
   geom_line(col = "indianred") + 
   theme_fivethirtyeight()
   
+#its preferable because it gives a finer grained picture of the differences in bike hires
+  
 
 ```
 
@@ -70,7 +74,7 @@ nyc_bikes_sans_gaps <- nyc_bikes_date_sum %>%
 
 fit_hires_pday <- nyc_bikes_sans_gaps %>% 
   model(snaive_model = SNAIVE(hires_per_day), 
-        arima_model  = ARIMA(hires_per_day), 
+        naive_model  = NAIVE(hires_per_day), 
         mean_model = MEAN(hires_per_day))
 
 forecast_dayhires <- fit_hires_pday %>% 
@@ -78,7 +82,8 @@ forecast_dayhires <- fit_hires_pday %>%
 
 forecast_dayhires %>% 
   autoplot(level = NULL) + 
-  autolayer(nyc_bikes_sans_gaps, colour = "black")
+  autolayer(nyc_bikes_sans_gaps, colour = "black") + 
+  theme_minimal()
 ```
 
 6. Test your model accuracy : choose a training data set from your main dataset, build a forecast on the training set, and then plot the training set forecast against the real data. Calculate model accuracy.
@@ -96,7 +101,7 @@ training_bikes <- nyc_bikes_sans_gaps %>%
 
 fit_training <- training_bikes %>%
   model(snaive_model = SNAIVE(hires_per_day), 
-        arima_model  = ARIMA(hires_per_day), 
+        NAIVE_model  = NAIVE(hires_per_day), 
         mean_model = MEAN(hires_per_day))
 
 
@@ -110,8 +115,13 @@ forecast_training <- fit_training %>%
 forecast_training %>% 
   autoplot(training_bikes) + 
   #now can add in the actual data 
-  autolayer(nyc_bikes_sans_gaps, color = "black") + 
+  autolayer(nyc_bikes_sans_gaps, color = "black") +  
   theme_minimal()
+
+
+forecast_training %>% 
+  autoplot(training_bikes, level = NULL) + 
+  autolayer(nyc_bikes_sans_gaps, color = "black")
 ```
 
 
@@ -127,8 +137,7 @@ accuracy_model
 
 
 
-So the models aren't a great fit to the actual data from the look of it. 
-
+So the models aren't a great fit to the actual data from the look of it. Also, the model fits aren't great (but i'm not that sure how to interpret them yet). My predicted data is not a good match to the actual data. There is clearly not enough data to create a good prediction from. My model predicts very little monthly/weekly variation - but seems to get overfit daily variation. 
 
 
 
@@ -158,11 +167,17 @@ nyc_bikes %>%
 
 
 ```{r}
+
+library(ggthemes)
+
 nyc_bikes %>% 
   ggplot + 
   aes(x = start_long, y = start_lat, col = month_used) + 
   geom_point() + 
-  facet_wrap(~ bike_id)
+  facet_wrap(~ bike_id) + 
+  scale_color_distiller("PuOr") + 
+  theme_fivethirtyeight()
+
 ```
 
 ```{r}
