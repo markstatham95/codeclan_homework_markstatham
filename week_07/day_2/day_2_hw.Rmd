@@ -31,6 +31,8 @@ nyc_bikes <- nyc_bikes %>%
 2. Summarise the number of bike hire counts by month. Make a plot of this data. *Hint: remember that to group time series (tsibble) data, you need to use index_by instead of group_by before your summarise function. What does this plot tell you about the time series? Do you think this downsampled data would be adequate to build a forecast with?
 
 ```{r}
+
+library(ggthemes)
 nyc_bikes %>% 
   index_by(month_used) %>% 
   summarise(hires_per_month = n()) %>%
@@ -45,7 +47,6 @@ nyc_bikes %>%
 3. Now Summarise the number of bike hire counts by date. Make a plot of this new aggregated data. What does this plot tell you about the time series? Would this data be preferrable for time series forecasting compared to the monthly data?
 
 ```{r}
-library(ggthemes)
 
 nyc_bikes_date_sum <- nyc_bikes %>% 
   index_by(date_used) %>% 
@@ -175,7 +176,6 @@ nyc_bikes %>%
   aes(x = start_long, y = start_lat, col = month_used) + 
   geom_point() + 
   facet_wrap(~ bike_id) + 
-  scale_color_distiller("PuOr") + 
   theme_fivethirtyeight()
 
 ```
@@ -196,13 +196,22 @@ nyc_bikes %>%
 library(leaflet)
 
 nyc_bikes_spatial <- nyc_bikes %>% 
-  select(start_lat, start_long, bike_id)
+  select(start_lat, start_long, bike_id, end_lat, end_long)
 
 
 
 bike_start_point_map <- leaflet(nyc_bikes_spatial) %>%
   addTiles() %>%
-  addCircleMarkers(lng = ~ start_long, lat = ~ start_lat, opacity = 1, fillOpacity = 0.01)
+  addCircleMarkers(lng = ~ start_long,
+                   lat = ~ start_lat, 
+                   opacity = 1, 
+                   fillOpacity = 0.01) %>% 
+  addCircleMarkers(lng = ~ end_long, 
+                   lat = ~ end_lat, 
+                   opacity = 1, 
+                   fillOpacity = 0.01) %>%
+  addPolylines(lng = ~c(start_long, end_long), 
+               lat = ~ c(start_lat, end_lat))
 
 bike_start_point_map
 
