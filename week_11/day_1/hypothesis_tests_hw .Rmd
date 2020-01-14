@@ -50,7 +50,7 @@ null_distribution %>%
 null_distribution %>% 
   get_p_value(obs_stat = observed_stat, direction = "both")
 
-#p_value less than 0.05 so we have sufficient evidence to reject the null that average sleep for our sample is different to that of the jabberwocky 
+#p_value less than 0.05 so we have sufficient evidence to reject the null that average sleep for our sample is the same as that of the jabberwocky. 
 
 
 ```
@@ -64,8 +64,12 @@ What type of test?
  
 alpha = 0.05
 
-H0: mean_sleep(omnivore) - mean_sleep(herbivore) = 0
-HA: mean_sleep(omnivore) - mean_sleep(hervibore) > 0
+H0: mean_sleep(omnivore) - mean_sleep(herbivore) = 0 <- being an omnivore or herbivore has no bearing on how long an animal sleeps 
+
+
+HA: mean_sleep(omnivore) - mean_sleep(hervibore) > 0 <- omnivores sleep for a significantly longer period on average than herbivores
+
+
 
 
 ```{r}
@@ -118,9 +122,6 @@ null_dist_vore %>%
 Perform an appropriate statistical test to determine whether the proportion of domesticated animals in the population of animal types is greater than 5%.
 
 ```{r}
-obs_dom_stat <- msleep %>% 
-  filter(conservation == "domesticated") %>%
-  summarise(prop_dom = n() / nrow(msleep))
 
 msleep %>% 
   group_by(conservation) %>% 
@@ -146,12 +147,18 @@ msleep_dom <- msleep %>%
 
 
 ```{r}
+obs_dom_stat <- msleep_dom %>% 
+  specify(response = domestic_flag, success = "dom") %>% 
+  calculate(stat = "prop") 
+
 null_distribution_dom <- msleep_dom %>%
   specify(response = domestic_flag, success = "dom") %>% 
   hypothesize(null = "point", p = 0.05) %>%
   generate(reps = 1000, type = "simulate") %>%
   calculate(stat = "prop") 
+```
 
+```{r}
 
 null_distribution_dom %>% 
   visualise(bins = 30) + 
