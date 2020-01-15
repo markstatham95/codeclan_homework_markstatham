@@ -54,6 +54,10 @@ diamonds <- diamonds %>%
 ggpairs(diamonds)
 ```
 
+
+price and carrot are strongly positively correlated 
+
+
 (ii) Perform further ggplot visualisations of any significant correlations you find.
 ```{r}
 
@@ -112,6 +116,9 @@ diamonds_dummies <- diamonds %>%
 model_1 <- lm(price ~ carat, data = diamonds)
 
 summary(model_1)
+
+
+plot(model_1)
 ```
 
 (ii) Run a regression with one or both of the predictor and response variables log() transformed and recheck the diagnostics. Do you see any improvement?
@@ -120,6 +127,9 @@ summary(model_1)
 model_2 <- lm(log(price) ~ log(carat), data = diamonds)
 
 summary(model_2)
+```
+```{r}
+plot(model_2)
 ```
 
 
@@ -132,6 +142,9 @@ model_3 <- lm(log(price) ~ log(carat) + cut, data = diamonds)
 summary(model_3)
 ```
 
+```{r}
+plot(model_3)
+```
 
 ```{r}
 model_4 <- lm(log(price) ~ log(carat) + color, data = diamonds)
@@ -139,6 +152,9 @@ model_4 <- lm(log(price) ~ log(carat) + color, data = diamonds)
 summary(model_4)
 ```
 
+```{r}
+plot(model_4)
+```
 
 
 ```{r}
@@ -146,6 +162,12 @@ model_5 <- lm(log(price) ~ log(carat) + clarity, data = diamonds)
 
 summary(model_5)
 ```
+
+```{r}
+plot(model_5)
+```
+
+
 (iv) Interpret the fitted coefficients for the levels of your chosen categorical predictor. Which level is the reference level? Which level shows the greatest difference in price from the reference level? [Hints - remember we are regressing the log(price) here, and think about what the presence of the log(carat) predictor implies. We’re not expecting a mathematical explanation]
 
 ```{r}
@@ -168,13 +190,20 @@ model_6 <- lm(log(price) ~ log(carat) + clarity + log(carat):clarity, data = dia
 summary(model_6)
 ```
 
-Seems justified as all coeffs statistically significant, plus r square goes up 
+Seems justified as all coeffs statistically significant, plus r square goes up (if only marginally )
 
 
 8. Find and plot an appropriate visualisation to show the effect of this interaction
 
 ```{r}
 ggPredict(model_6)
+
+
+diamonds %>%
+  ggplot(aes(x = log(carat), y = log(price), colour = clarity)) +
+  geom_point(alpha = 0.1) +
+  geom_smooth(method = "lm", se = FALSE) +
+  facet_wrap(~ clarity)
 ```
 
 
