@@ -1,0 +1,180 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+#Homework Week 11 Day 2
+
+1. Load the diamonds.csv data set and undertake an initial exploration of the data. You will find a description of the meanings of the variables on the relevant Kaggle page
+
+```{r}
+library(tidyverse)
+library(GGally)
+library(ggiraphExtra)
+library(mosaicData)
+
+diamonds <- read_csv("diamonds.csv")
+```
+
+```{r}
+
+glimpse(diamonds)
+
+summary(diamonds)
+```
+
+2. We expect the carat of the diamonds to be strong correlated with the physical dimensions x, y and z. Use ggpairs() to investigate correlations between these four variables.
+
+```{r}
+diamonds %>%
+  ggcorr()
+
+
+ggpairs(diamonds, columns = c("carat", "x", "y", "z"))
+```
+
+3. So, we do find significant correlations. Let’s drop columns x, y and z from the dataset, in preparation to use only carat going forward.
+
+```{r}
+
+diamonds <- diamonds %>% 
+  select(-x, -y, -z)
+
+
+diamonds <- diamonds %>% 
+  select(-X1)
+
+```
+
+
+4. We are interested in developing a regression model for the price of a diamond in terms of the possible predictor variables in the dataset.
+
+(i) Use ggpairs() to investigate correlations between price and the predictors (this may take a while to run, don’t worry, make coffee or something).
+
+```{r}
+ggpairs(diamonds)
+```
+
+(ii) Perform further ggplot visualisations of any significant correlations you find.
+```{r}
+
+diamonds %>% 
+  ggplot() + 
+  geom_point(aes(x = carat, y = price)) 
+
+diamonds %>% 
+  ggplot() + 
+  aes(x = price) + 
+  geom_histogram()
+```
+
+5. Shortly we may try a regression fit using one or more of the categorical predictors cut, clarity and color, so let’s investigate these predictors:
+
+(i) Investigate the factor levels of these predictors. How many dummy variables do you expect for each of them?
+
+```{r}
+table(diamonds$cut) 
+
+# 5 levels so 4 dummies 
+
+
+table(diamonds$color)
+
+#7 levels so 6 dummies 
+
+table(diamonds$clarity)
+
+# 8 levels so 7 dummies 
+
+
+```
+
+
+
+(ii) Use the dummy_cols() function in the fastDummies package to generate dummies for these predictors and check the number of dummies in each case.
+
+```{r}
+library(fastDummies)
+
+diamonds_dummies <- diamonds %>% 
+  dummy_cols(select_columns = c("cut", "clarity", "color"), 
+             remove_first_dummy = TRUE, 
+             remove_selected_columns = TRUE)
+
+
+```
+
+
+6. Going forward we’ll let R handle dummy variable creation for categorical predictors in regression fitting (remember lm() will generate the correct numbers of dummy levels automatically, absorbing one of the levels into the intercept as a reference level)
+
+(i) First, we’ll start with simple linear regression. Regress price on carat and check the regression diagnostics.
+
+```{r}
+model_1 <- lm(price ~ carat, data = diamonds)
+
+summary(model_1)
+```
+
+(ii) Run a regression with one or both of the predictor and response variables log() transformed and recheck the diagnostics. Do you see any improvement?
+
+```{r}
+model_2 <- lm(log(price) ~ log(carat), data = diamonds)
+
+summary(model_2)
+```
+
+
+(iii) Let’s use log() transformations of both predictor and response. Next, experiment with adding a single categorical predictor into the model. Which categorical predictor is best? [Hint - investigate r2 values]
+
+
+```{r}
+model_3 <- lm(log(price) ~ log(carat) + cut, data = diamonds)
+
+summary(model_3)
+```
+
+
+```{r}
+model_4 <- lm(log(price) ~ log(carat) + color, data = diamonds)
+
+summary(model_4)
+```
+
+
+
+```{r}
+model_5 <- lm(log(price) ~ log(carat) + clarity, data = diamonds)
+
+summary(model_5)
+```
+(iv) Interpret the fitted coefficients for the levels of your chosen categorical predictor. Which level is the reference level? Which level shows the greatest difference in price from the reference level? [Hints - remember we are regressing the log(price) here, and think about what the presence of the log(carat) predictor implies. We’re not expecting a mathematical explanation]
+
+```{r}
+
+#Have chosen clarity as it has the highest R square and all its categories are statistically significant at the 0.05 level 
+
+
+table(diamonds$clarity)
+
+#so reference for clarity is I1: the greatest difference is with IF, which are described as 'flawless' diamonds online 
+```
+
+
+
+7. Try adding an interaction between log(carat) and your chosen categorical predictor. Do you think this interaction term is statistically justified?
+
+```{r}
+model_6 <- lm(log(price) ~ log(carat) + clarity + log(carat):clarity, data = diamonds)
+
+summary(model_6)
+```
+
+Seems justified as all coeffs statistically significant, plus r square goes up 
+
+
+8. Find and plot an appropriate visualisation to show the effect of this interaction
+
+```{r}
+ggPredict(model_6)
+```
+
+
