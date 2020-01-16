@@ -1,0 +1,98 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# King Country Model Development Hw
+
+
+I've been given a set of data on housing sale prices for the last few years in King County (near Seattle) between May 2014 and May 2015. Have a look at the variable definitions on the Kaggle page
+
+
+First, tidy the data for regression 
+```{r}
+
+library(tidyverse)
+kc_house_data <- read_csv("kc_house_data.csv")
+```
+
+You might like to think about removing some or all of date, id, sqft_living15, sqft_lot15 and zipcode (lat and long provide a better measure of location in any event).
+```{r}
+head(kc_house_data)
+
+
+kc_house_tidy <- kc_house_data %>%
+  select(-date, -id, -sqft_living15, -sqft_lot15, -zipcode)
+
+
+```
+
+
+Have a think about how to treat waterfront. Should we convert its type?
+````{r}
+
+class(kc_house_tidy$waterfront)
+
+#waterfront appears to be a binary variable - we need to know what 1 and 0 stand for: 1 is overlooking waterfront, 0 not
+
+#I'm not sure if there is a need to convert its type? 
+
+```
+
+
+
+We converted yr_renovated into a renovated logical variable, indicating whether the property had ever been renovated. You may wish to do the same.
+
+```{r}
+kc_house_tidy$yr_renovated
+
+kc_house_tidy <- kc_house_tidy %>%
+  mutate(renovated = ifelse(yr_renovated > 0, TRUE, FALSE)) %>% 
+  select(-yr_renovated)
+
+```
+
+
+Have a think about how to treat condition and grade? Are they interval or categorical ordinal data types?
+```{r}
+kc_house_tidy %>% 
+  distinct(condition)
+
+kc_house_tidy %>%
+  distinct(grade)
+
+#because these are categories it makes sense to turn them into dummies 
+
+library(fastDummies)
+
+kc_dummies <- kc_house_tidy %>% 
+  dummy_cols(select_columns = c("condition", "grade"), 
+             remove_first_dummy = TRUE, 
+             remove_selected_columns = TRUE)
+```
+
+
+```{r}
+alias(price ~., kc_dummies)
+```
+
+Systematically build a regression model containing up to four main effects (remember, a main effect is just a single predictor with coefficient), testing the regression diagnostics as you go: 
+
+(i) splitting datasets into numeric and non-numeric columns might help ggpairs() run in manageable time, although you will need to add either a price or resid column to the non-numeric dataframe in order to see its correlations with the non-numeric predictors.
+
+```{r}
+kc_num <- kc_house_tidy %>% 
+  select(-renovated, -grade, -condition)
+
+library(ggiraphExtra)
+
+library(GGally)
+ggpairs(kc_num)
+
+```
+Sorry R kept crashing so this is as far as I got...
+
+```{r}
+
+```
+

@@ -69,7 +69,15 @@ diamonds %>%
   ggplot() + 
   aes(x = price) + 
   geom_histogram()
+
+ggpairs(diamonds, columns = c("carat", "price"))
 ```
+
+```{r}
+max(diamonds$price)
+```
+
+
 
 5. Shortly we may try a regression fit using one or more of the categorical predictors cut, clarity and color, so let’s investigate these predictors:
 
@@ -178,6 +186,10 @@ plot(model_5)
 table(diamonds$clarity)
 
 #so reference for clarity is I1: the greatest difference is with IF, which are described as 'flawless' diamonds online 
+
+#need to exponential the log
+
+ratio <- exp(1.114625)
 ```
 
 
