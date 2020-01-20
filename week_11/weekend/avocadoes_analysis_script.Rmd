@@ -1,0 +1,299 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+#Week 11 Weekend Homework: Avocadoes 
+
+
+We’ve looked at a few different ways in which we can build models this week, including how to prepare them properly. This weekend we’ll build a multiple linear regression model on a dataset which will need some preparation. The data has come from Kaggle and can be found in the data folder.
+
+We want to model avocado sales. You’ll need to identify the target variable and use the tools we’ve worked with this week in order to prepare your dataset and find appropriate predictors. Once you’ve built your model use the validation techniques discussed on Wednesday to evaluate it.
+
+```{r}
+library(tidyverse)
+library(modelr)
+library(janitor)
+library(GGally)
+```
+
+```{r}
+avocadoes <- read_csv("data/avocado.csv")
+
+glimpse(avocadoes)
+
+summary(avocadoes_clean)
+```
+
+```{r}
+
+avocadoes <- clean_names(avocadoes)
+
+#according to the HASS website, 4046, 4225 and 4770 are different sizes of HASS avocado 
+#so I'm going to recode those variables with interpretable names 
+
+avocadoes_clean <- avocadoes %>% 
+  rename(small_av_total_sold = x4046, 
+         large_av_total_sold = x4225, 
+         x_large_av_total_sold = x4770)
+
+avocadoes_clean %>% 
+  distinct(region)
+
+#there are a lot of regions, and as its a categorical, a linear regression model would have to treat them as dummies, which could be tricky further down the line
+
+
+avocadoes_clean %>% 
+  select(total_volume, date)
+
+avocadoes_clean %>% 
+  filter(region == "TotalUS") %>%
+  ggplot() + 
+  aes(x = date, y = small_av_total_sold) +
+  geom_point()
+
+
+
+avocadoes_clean %>%
+  filter(region == "TotalUS") %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = type), alpha = 0.5)
+
+
+avocadoes_clean %>% 
+  filter(region == "TotalUS") %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = type)) + 
+  facet_grid(~ type)
+
+```
+
+```{r}
+
+avocadoes_clean %>% 
+  group_by(type) %>% 
+  summarise(mean(average_price))
+
+avocadoes_clean %>% 
+  ggplot() + 
+  aes(x = total_volume) + 
+  geom_histogram(bins = 100)
+
+
+
+avocadoes_clean %>% 
+  summarise(max = min(total_volume))
+  
+
+```
+```{r}
+avocadoes_clean %>% 
+  ggplot(aes(x = average_price)) +
+  geom_histogram(bins = 50) 
+
+# a bit of a right skew on price 
+```
+
+```{r}
+avocadoes_clean %>% 
+  group_by(type) %>% 
+  ggplot(aes(y = average_price, x = type)) + 
+  geom_boxplot()
+
+
+           
+```
+
+
+
+
+
+
+
+
+
+```{r}
+
+#think I'll need to split the date column into more manageable size - might try to do it by financial quarter 
+
+library(lubridate)
+
+avocadoes_clean <- avocadoes_clean %>% 
+  mutate(quarter = quarter(date, with_year = TRUE))
+
+
+avocadoes_clean %>% 
+  filter(region == "TotalUS") %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = type))
+
+
+```
+```{r}
+avocadoes_clean %>% 
+  filter(str_detect(region, "C")) %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = region)) + 
+  facet_wrap(~ region)
+
+avocadoes_clean %>% 
+  filter(str_detect(region, "A")) %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = region)) + 
+  facet_wrap(~ region)
+
+avocadoes_clean %>% 
+  filter(str_detect(region, "N")) %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = region)) + 
+  facet_wrap(~ region)
+
+avocadoes_clean %>% 
+  group_by(region) %>% 
+  summarise(price = mean(average_price)) %>%
+  arrange(desc(price))
+
+avocadoes_clean %>% 
+  filter(str_detect(region, "H")) %>%
+  ggplot() + 
+  aes(x = date, y = average_price) +
+  geom_line(aes(colour = region)) + 
+  facet_wrap(~ region)
+```
+
+
+```{r}
+avocadoes_clean %>% 
+  ggpairs(columns = c("average_price",
+                      "total_volume",
+                      "small_av_total_sold",
+                      "large_av_total_sold", 
+                      "x_large_av_total_sold" 
+                      ))
+```
+
+
+
+```{r}
+#should turn type variable into dummies 
+
+library(fastDummies)
+
+avocadoes_dummies <- avocadoes_clean %>% 
+  dummy_cols(select_columns = "type", 
+             remove_first_dummy = TRUE, 
+             remove_selected_columns = TRUE)
+
+
+#also need to deal with the region column - keep as categorical? 
+
+avocadoes_dummies %>% 
+  distinct(region)
+
+#there is a 'total US' value in the region column - could try to use it 
+
+avocadoes_dummies %>% 
+  filter(region == "TotalUS") %>% 
+  nrow()
+
+
+#
+#think i'm going to use this for the data - though a different region investigation could be done later 
+
+  
+```
+
+
+
+```{r}
+avocadoes_dummies_US <- avocadoes_dummies %>% 
+  filter(region == "TotalUS") %>%
+  select(-x1, -region, -date)
+
+avocadoes_dummies %>%
+  ncol()
+  
+library(leaps)
+
+alias(total_volume ~ ., data = avocadoes_dummies_US)
+
+regsubsets_forward <- regsubsets(total_volume ~ ., data = avocadoes_dummies_US, nvmax = 13, method = "forward")
+
+sum_reg_forwards <- summary(regsubsets_forward)
+```
+
+```{r}
+sum_reg_forwards$which
+```
+
+```{r}
+plot(regsubsets_forward, scale = "adjr2")
+
+```
+
+
+
+
+```{r}
+
+plot(regsubsets_forward, scale = "bic")
+
+```
+
+
+```{r}
+regsubsets_exhaustive <- regsubsets(total_volume ~ ., data = avocadoes_dummies_US, nvmax = 13, method = "exhaustive")
+```
+
+
+
+```{r}
+plot(regsubsets_exhaustive, scale = "bic")
+
+```
+
+
+
+```{r}
+plot(regsubsets_exhaustive, scale = "adjr2")
+```
+
+```{r}
+model <- lm(total_volume ~ 
+              average_price + 
+              small_av_total_sold + 
+              large_av_total_sold + 
+              x_large_av_total_sold + 
+              total_bags + 
+              small_bags + 
+              quarter, 
+            data = avocadoes_dummies_US)
+
+summary(model)
+```
+
+
+I'm not sure if this model works, given that a lot of these variables are just parts of total_volume! 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
