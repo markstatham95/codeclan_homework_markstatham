@@ -129,12 +129,26 @@ p_and_p_numeric %>%
   summarise(max(line_id))
 
 library(viridis)
+```
 
-p_and_p_numeric %>%
+
+
+
+
+
+```{r}
+
+```
+
+```{r}
+
+p_and_p_2 <- p_and_p_numeric %>%
   group_by(line_id) %>%
-  mutate(mean_sent = mean(value)) %>%
+  mutate(mean_sent = mean(value))
+
+p_and_p_2 %>%
    ggplot(aes(x = line_id, y = mean_sent)) + 
-  geom_col(fill = "indianred") + 
+  geom_bar(stat = "identity", fill = "indianred") + 
   theme_minimal() + 
   labs(title = "Pride and Prejudice: sentiment analysis")
 
@@ -144,8 +158,30 @@ s_and_s_numeric %>%
   group_by(line_id) %>%
   mutate(mean_sent = mean(value)) %>%
    ggplot(aes(x = line_id, y = mean_sent)) + 
-  geom_col(fill = "purple") + 
+  geom_bar(stat = "identity", fill = "purple") + 
   theme_minimal() + 
   labs(title = "Sense and Sensibility: sentiment analysis")
 ```
+
+
+
+```{r}
+s_and_s_numeric %>%
+  group_by(line_id) %>%
+  mutate(mean_sent = mean(value)) %>%
+   ggplot(aes(x = line_id, y = mean_sent)) + 
+  geom_area(alpha = 0.7)+ 
+  theme_minimal() + 
+  labs(title = "Sense and Sensibility: sentiment analysis")
+```
+
+
+
+
+
+
+
+
+
+
 

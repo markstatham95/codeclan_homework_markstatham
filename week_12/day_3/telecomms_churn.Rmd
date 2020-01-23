@@ -1,0 +1,366 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+# Analysing Telecomm Churn: Logistic Regression Lab 
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+```{r}
+telecomms_churn <- read_xlsx("telecomms_churn.xlsx")
+```
+
+```{r}
+
+library(janitor)
+telecomms_churn <- clean_names(telecomms_churn)
+
+
+glimpse(telecomms_churn)
+```
+
+```{r}
+head(telecomms_churn)
+
+
+```
+
+```{r}
+
+
+#there are a lot of categorical variables in the data - in particular, churn is a categorical, meaning a logistic regression model is an appropriate classifier 
+library(GGally)
+
+telecomms_churn %>%
+  select(-customer_id, -gender, - senior_citizen, -partner, -dependents, - phone_service, - internet_service, - contract) %>%
+  ggpairs()
+
+```
+
+
+```{r}
+
+telecomms_churn %>%
+  ggplot(aes(x = senior_citizen, y = churn)) + 
+  geom_bar(stat = "identity")
+
+telecomms_churn %>%
+  ggplot(aes(x = churn, y = )) + 
+  geom_col(stat = "identity")
+
+```
+```{r}
+telecomms_churn %>%
+  distinct(contract)
+```
+
+```{r}
+
+telecomms_churn %>% 
+  select(-tenure, - monthly_charges, - total_charges, - customer_id, -gender, -senior_citizen, -partner, dependents) %>%
+  ggpairs()
+
+```
+
+
+
+
+
+ggpairs v hard to interpret here 
+
+```{r}
+
+#I need to convert my columns that are characters to factors 
+
+telecomms_churn_clean <- telecomms_churn %>%
+  mutate_if(is.character, as_factor) %>%
+  mutate(senior_citizen = if_else(
+    senior_citizen == 1, "Yes", "No")
+    ) %>%
+  mutate(senior_citizen = as_factor(senior_citizen))
+
+
+telecomms_churn_clean <- telecomms_churn_clean %>% 
+  select(-customer_id)
+
+```
+
+```{r}
+
+model_1 <- glm(churn ~ tenure, data = telecomms_churn_clean, 
+               family = binomial(link = "logit"))
+
+summary(model_1)
+
+```
+
+
+```{r}
+model_2 <- glm(churn ~ monthly_charges, 
+               data = telecomms_churn_clean, 
+               family = binomial(link = "logit"))
+
+summary(model_2)
+```
+
+
+```{r}
+telecomms_churn_clean %>%
+  distinct(contract)
+
+model_3 <- glm(churn ~ contract, 
+               data = telecomms_churn_clean, 
+               family = binomial(link = "logit"))
+
+summary(model_3)
+```
+
+
+
+Now I have three models and therefor three potential classifiers!
+
+I want to compare each of these, so I'm going to plot their ROC curves and compare their AUC values 
+
+
+```{r}
+library(pROC)
+
+library(modelr)
+
+telecomms_churn_with_mod1_preds <- telecomms_churn_clean %>%
+  add_predictions(model_1, type = "response")
+
+roc_obj_model_1 <- telecomms_churn_with_mod1_preds %>%
+  roc(response = churn, 
+      predictor = pred)
+```
+
+```{r}
+telecomms_churn_with_mod2_preds <- telecomms_churn_clean %>%
+  add_predictions(model_2, type = "response")
+
+roc_obj_model_2 <- telecomms_churn_with_mod2_preds %>%
+  roc(response = churn, 
+      predictor = pred)
+
+```
+
+```{r}
+telecomms_churn_with_mod3_preds <- telecomms_churn_clean %>%
+  add_predictions(model_3, type = "response")
+
+roc_obj_model_3 <- telecomms_churn_with_mod3_preds %>%
+  roc(response = churn, 
+      predictor = pred)
+```
+
+Now I want to plot these roc curves to compare them 
+
+```{r}
+roc_comparison <- ggroc(list(
+  "tenure model" = roc_obj_model_1,
+  "monthly charges model" = roc_obj_model_2, 
+  "contract type model" = roc_obj_model_3), 
+                        legacy.axes = TRUE) + 
+  coord_fixed() + 
+  theme_minimal()
+
+roc_comparison
+```
+
+Now want to compare the AUC of each model 
+```{r}
+tibble(
+  auc = c(auc(roc_obj_model_1), auc(roc_obj_model_2), auc(roc_obj_model_3)),
+  model = c("tenure", "monthly charges", "contract type")
+)
+
+```
+
+
+
+Now for some cross-validation 
+
+```{r}
+library(caret)
+```
+
+
+
+```{r}
+train_control <- trainControl(
+  method = "repeatedcv", 
+  number = 5, 
+  repeats = 100, 
+  savePredictions = TRUE, 
+  classProbs = TRUE, 
+  summaryFunction = twoClassSummary
+)
+
+model_1_cv <- train(churn ~ tenure, 
+               data = telecomms_churn_clean, 
+               trControl = train_control,
+               method = "glm", 
+               family = binomial(link = "logit")
+)
+
+```
+```{r}
+summary(model_1_cv)
+
+model_1_cv$results
+```
+
+```{r}
+train_control <- trainControl(
+  method = "repeatedcv", 
+  number = 5, 
+  repeats = 100, 
+  savePredictions = TRUE, 
+  classProbs = TRUE, 
+  summaryFunction = twoClassSummary
+)
+
+model_2_cv <- train(churn ~ monthly_charges, 
+               data = telecomms_churn_clean, 
+               trControl = train_control,
+               method = "glm", 
+               family = binomial(link = "logit")
+)
+
+model_2_cv$results
+
+```
+
+```{r}
+
+
+model_3_cv <- train(churn ~ contract, 
+               data = telecomms_churn_clean, 
+               trControl = train_control,
+               method = "glm", 
+               family = binomial(link = "logit")
+)
+
+model_3_cv$results
+
+```
+
+
+So model 1 has the highest AUC 
+```{r}
+summary(model_1)
+
+
+# interpreting the coefficent value 
+
+#currently it is expressed in terms of log odds, so a unit 
+
+telecomms_churn_clean %>%
+  ggplot(aes(x = tenure)) + 
+  geom_histogram()
+
+odds_at_tenure_40 <- telecomms_churn_with_mod1_preds %>%
+  filter(tenure == 40) %>%
+  mutate(odds = pred/(1-pred)) %>%
+  select(odds) %>%
+  slice(1) 
+  
+```
+
+```{r}
+
+#how do the odds change if we decrease tenure by 20?
+library(broom)
+
+b_tenure_coeff <- tidy(model_1) %>%
+  filter(term == "tenure") %>%
+  select(estimate)
+
+
+odds_factor <- exp(b_tenure_coeff * -20)
+
+odds_at_tenure_20 <- odds_factor * odds_at_tenure_40
+
+odds_at_tenure_20 - odds_at_tenure_40
+
+# so a change in -20 of the tenure has led to an increase in the odds of churn of 0.255
+
+
+```
+
+
+
+
+
+```{r}
+model_with_all <- glm(churn ~ ., 
+                      data = telecomms_churn_clean, 
+                      family = binomial(link = "logit"))
+
+summary(model_with_all)
+```
+
+
+
+
+```{r}
+train_control <- trainControl(
+  method = "repeatedcv", 
+  number = 5, 
+  repeats = 100, 
+  savePredictions = TRUE, 
+  classProbs = TRUE, 
+  summaryFunction = twoClassSummary
+)
+
+model_with_all_cv <- train(churn ~ ., 
+               data = telecomms_churn_clean, 
+               trControl = train_control,
+               method = "glm", 
+               family = binomial(link = "logit"), na.action = na.omit
+)
+
+
+model_with_all_cv$results
+
+```
+
+Think I'll remove partner and gender and try again
+
+```{r}
+model_multiple <- glm(churn ~
+                        total_charges + monthly_charges + contract +
+                        internet_service + phone_service + tenure + 
+                        dependents + senior_citizen, 
+                      data = telecomms_churn_clean, 
+                      family = binomial(link = "logit"))
+
+summary(model_multiple)
+
+
+```
+
+
+```{r}
+model_sans_monthly <- glm(churn ~ 
+                            total_charges + contract +
+                        internet_service + phone_service + tenure + 
+                        dependents + senior_citizen, 
+                        data = telecomms_churn_clean, 
+                        family = binomial(link = "logit"))
+
+summary(model_sans_monthly)
+```
+
+
+```{r}
+anova(model_sans_monthly, model_multiple)
+```
+
+
+
